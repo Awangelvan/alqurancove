@@ -1,26 +1,38 @@
-function getDataQuran() {
-  return fetch("https://api.npoint.io/99c279bb173a6e28359c/data")
-    .then((response) => response.json())
-    .then((response) => response);
+// Ambil data Quran
+async function getDataQuran() {
+  const response = await fetch("https://api.npoint.io/99c279bb173a6e28359c/data");
+  return response.json();
 }
 
+// Ambil ayat-ayat dalam sebuah surat berdasarkan ID
+async function getDataSurah(id) {
+  const response = await fetch(`https://api.npoint.io/99c279bb173a6e28359c/surat/${id}`);
+  return response.json();
+}
+
+// Ambil detail surat berdasarkan ID
+async function getDetailSurah(id) {
+  const response = await fetch(`https://api.npoint.io/99c279bb173a6e28359c/data/${id - 1}`);
+  return response.json();
+}
+
+// Buat tampilan thumbnail untuk daftar surat
 function thumbnail(q) {
-  return `<div class="card">
-            <div class="card-header">Surah : ${q.id}</div>
-            <div class="card-body">
-              <h5 class="card-title">${q.title} | ${q.arabtitle}</h5>
-              <p class="card-text">${q.translate} | ${q.ayahsum} ayat | ${q.region}</p>
-              <a href='#surahpage' class="modal-button-info btn btn-success txt-white" data-idsurah= ${q.id}>baca</a>
-            </div>
-          </div>`;
+  return `
+    <div class="card">
+      <div class="card-header">Surah: ${q.id}</div>
+      <div class="card-body">
+        <h5 class="card-title">${q.title} | ${q.arabtitle}</h5>
+        <p class="card-text">${q.translate} | ${q.ayahsum} ayat | ${q.region}</p>
+        <a href="surah.html?id=${q.id}" class="btn btn-success txt-white">Baca</a>
+      </div>
+    </div>`;
 }
 
-//display a surah
-
+// Buat tampilan detail surat
 function text(v, q) {
   return `
-  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-  <divclass="container-surah container-fluid">
+    <div class="container-surah container-fluid">
       <div class="row">
         <div class="col-md-12">
           <div class="list-group text-center">
@@ -34,48 +46,14 @@ function text(v, q) {
     </div>`;
 }
 
+// Buat tampilan ayat-ayat Quran
 function arabayahs(q) {
-  return ` <h3>${q.ar} {${q.nomor}}</h3>
-            <br>arti : ${q.id}
-  `;
+  return `
+    <h3>${q.ar} {${q.nomor}}</h3>
+    <p>Arti: ${q.id}</p>`;
 }
 
-function getDataSurah(id) {
-  const data = fetch("https://api.npoint.io/99c279bb173a6e28359c/surat/" + id)
-    .then((response) => response.json())
-    .then((response) => response);
-  return data;
-}
-
-function getDetailSurah(id) {
-  return fetch("https://api.npoint.io/99c279bb173a6e28359c/data/" + (id - 1))
-    .then((response) => response.json())
-    .then((response) => response);
-}
-
-const display = document.querySelector(".modal-display");
-document.addEventListener("click", async function (e) {
-  if (e.target.classList.contains("modal-button-info")) {
-    const surahID = e.target.dataset.idsurah;
-    const datasurah = await getDataSurah(surahID);
-    const finaldata = await getDetailSurah(surahID);
-    console.log(finaldata);
-    const ayahs = datasurah;
-    let surah = ``;
-    // loop ayat quran
-    ayahs.forEach((q) => {
-      surah += arabayahs(q);
-    });
-
-    display.innerHTML = text(finaldata, surah);
-    // menutup jendela surat
-    const btnModalClose = document.querySelector(".btn-close");
-    btnModalClose.addEventListener("click", () => {
-      display.innerHTML = ``;
-    });
-  }
-});
-
+// Tampilkan daftar surat di halaman index.html
 async function displaySurah() {
   const data = await getDataQuran();
   const dataQuran = data.map((quran) => ({
@@ -95,4 +73,34 @@ async function displaySurah() {
   container.innerHTML = card;
 }
 
-document.addEventListener("DOMContentLoaded", displaySurah());
+// Tampilkan detail surat di halaman surat.html
+async function displayDetailSurah() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const surahID = urlParams.get("id");
+
+  if (!surahID) {
+    document.body.innerHTML = "<h1>Surat tidak ditemukan</h1>";
+    return;
+  }
+
+  const datasurah = await getDataSurah(surahID);
+  const finaldata = await getDetailSurah(surahID);
+
+  let surah = ``;
+  datasurah.forEach((q) => {
+    surah += arabayahs(q);
+  });
+
+  const display = document.querySelector(".modal-display");
+  display.innerHTML = text(finaldata, surah);
+  document.title = `Al-Quran | COVE | ${finaldata.nama}`;
+}
+
+// Tentukan halaman mana yang aktif
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.querySelector(".list-surah")) {
+    displaySurah();
+  } else if (document.querySelector(".modal-display")) {
+    displayDetailSurah();
+  }
+});

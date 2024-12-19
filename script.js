@@ -1,5 +1,3 @@
-// display an list of surahs
-
 function getDataQuran() {
   return fetch("https://api.npoint.io/99c279bb173a6e28359c/data")
     .then((response) => response.json())
@@ -12,7 +10,7 @@ function thumbnail(q) {
             <div class="card-body">
               <h5 class="card-title">${q.title} | ${q.arabtitle}</h5>
               <p class="card-text">${q.translate} | ${q.ayahsum} ayat | ${q.region}</p>
-              <a  class="modal-button-info btn btn-success txt-white" data-idsurah= ${q.id}>baca</a>
+              <a href='#surahpage' class="modal-button-info btn btn-success txt-white" data-idsurah= ${q.id}>baca</a>
             </div>
           </div>`;
 }

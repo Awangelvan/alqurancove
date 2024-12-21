@@ -39,7 +39,7 @@ function text(v, q) {
             <h1 class="title bg-success text-white">${v.nama} | ${v.asma}</h1>
             <h2>${v.arti} | ${v.ayat} ayah</h2>
             <hr />
-            <div class="ayahs-container mb-2">${q}</div>
+            <div class="ayahs-container">${q}</div>
           </div>
         </div>
       </div>
@@ -48,9 +48,13 @@ function text(v, q) {
 
 // Buat tampilan ayat-ayat Quran
 function arabayahs(q) {
-  return `
-    <h3>${q.ar} {${q.nomor}}</h3>
-    <p>Arti: ${q.id}</p>`;
+  return `<div class="card card-ayat">
+            <div class="card-body d-flex-column">
+              <h5 class="card-title d-flex justify-content-end">{${q.nomor}} ${q.ar}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">${q.tr}</h6>
+              <p class="card-text">${q.id}</p>
+            </div>
+          </div>`;
 }
 
 // Tampilkan daftar surat di halaman index.html

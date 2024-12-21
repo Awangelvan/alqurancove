@@ -19,7 +19,7 @@ async function getDetailSurah(id) {
 // Buat tampilan thumbnail untuk daftar surat
 function thumbnail(q) {
   return `
-    <div class="card">
+    <div class="card mb-3" data-namasurah="${q.title.toLowerCase()}">
       <div class="card-header">Surah: ${q.id}</div>
       <div class="card-body">
         <h5 class="card-title">${q.title} | ${q.arabtitle}</h5>
@@ -108,3 +108,49 @@ document.addEventListener("DOMContentLoaded", () => {
     displayDetailSurah();
   }
 });
+
+// mencari dan menampilkan surah dengan menggunakan kotak input
+
+const btnSearch = document.getElementById("tombol");
+btnSearch.addEventListener("click", async function () {
+  //variabel input
+  const inputKeyword = document.querySelector(".input-keyword").value;
+  const inputKeywordLower = String(inputKeyword).toLowerCase();
+  // variabel data
+  const listDaftarSurah = await getDataQuran();
+  const daftarSurah = listDaftarSurah.map((data) => data.nama.toLowerCase());
+  const filteredSurahs = daftarSurah.filter((item) => item.includes(inputKeywordLower));
+  // //variabel element target surah yang dicari
+  const container = document.querySelector(".search-result-container");
+  if (filteredSurahs == inputKeywordLower) {
+    scrollpage(inputKeywordLower);
+  } else if (filteredSurahs.length > 0) {
+    let count = 0;
+    const arraySurah = [];
+    const batas = filteredSurahs.length;
+    for (let i = 0; i < batas; i++) {
+      const surah = filteredSurahs[count];
+      arraySurah.push(surah);
+      count += 1;
+    }
+
+    container.innerHTML = "<h2>hasil yang kami temukan : </h2>";
+    arraySurah.forEach((surah) => {
+      const template = `
+        <div class="col-6 mb-1">
+        <div class="card card-body">
+          <a onclick="scrollpage('${surah}')" class="btn btn-success txt-white">${surah}</a><br>
+        </div>
+        </div> `;
+      container.innerHTML += template;
+    });
+  } else {
+    container.innerHTML = "<h1>surat Tidak ditemukan</h1>";
+  }
+});
+
+function scrollpage(v) {
+  const targetElement = document.querySelector(`[data-namasurah="${v}"]`);
+  targetElement.scrollIntoView({ behavior: "smooth" });
+  targetElement.style.border = "solid green 5px";
+}
